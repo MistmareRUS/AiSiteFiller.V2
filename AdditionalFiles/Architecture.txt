@@ -1,0 +1,18 @@
+AiSiteFiller.V2 (Корень проекта)
+│
+├── 📁 Domain
+│   ├── 📁 Entities       (Классы моделей: Article, QueueTask, TitleLog)
+│   └── 📁 Enums          (Перечисления: PlatformType, TaskStatus, LangType)
+│
+├── 📁 Application
+│   ├── 📁 Interfaces     (Контракты: IPublisherService, IDbRepository, IAiClient)
+│   └── 📁 Services       (Логика координации конвейера и обработки очередей)
+│
+├── 📁 Infrastructure
+│   ├── 📁 Persistence    (Реализация работы с PostgreSQL и MongoDB)
+│   ├── 📁 Clients        (Сетевые клиенты: DeepSeek, SD, Ollama, WordPress, Веер)
+│   └── 📁 Services       (Технические службы: TelegramAlerts, CustomLogger)
+│
+└── 📁 Presentation
+    ├── 📁 Forms          (Визуальные формы WinForms)
+    └── 📁 Common         (Логика статус-бара и конфигурации DI)
