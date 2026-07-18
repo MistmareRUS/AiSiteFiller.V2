@@ -10,7 +10,7 @@ AiSiteFiller.V2 (Корень проекта)
 │
 ├── 📁 Infrastructure
 │   ├── 📁 Persistence    (Реализация работы с PostgreSQL и MongoDB)
-│   ├── 📁 Clients        (Сетевые клиенты: DeepSeek, SD, Ollama, WordPress, Веер)
+│   ├── 📁 Clients        (Сетевые клиенты: CloudAi, SD, Ollama, WordPress, Веер)
 │   └── 📁 Services       (Технические службы: TelegramAlerts, CustomLogger)
 │
 └── 📁 Presentation

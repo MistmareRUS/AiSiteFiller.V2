@@ -1,5 +1,6 @@
 ﻿using AiSiteFiller.V2.Application.Interfaces;
 using AiSiteFiller.V2.Application.Services;
+using AiSiteFiller.V2.Infrastructure.BackgroundServices;
 using AiSiteFiller.V2.Infrastructure.Clients;
 using AiSiteFiller.V2.Infrastructure.Persistence;
 using AiSiteFiller.V2.Infrastructure.Services;
@@ -53,9 +54,14 @@ namespace AiSiteFiller.V2.Presentation.Common
             };
 
             // 6. Регистрация HttpClient-клиентов ИИ с привязкой хэндлера устойчивости Polly v8
-            // Регистрируем конкретные реализации текстовых клиентов
-            services.AddHttpClient<DeepSeekClient>().AddResilienceHandler("ProxyApiPipeline", pb => pb.AddRetry(retryOptions));
-            services.AddHttpClient<OllamaTextClient>().AddResilienceHandler("OllamaTextPipeline", pb => pb.AddRetry(retryOptions));
+            services.AddHttpClient<CloudAiClient>().AddResilienceHandler("ProxyApiPipeline", pb => pb.AddRetry(retryOptions));
+
+            // Задаем локальному текстовому ИИ таймаут в 5 минут, чтобы он успевал продумать и выдать весь Base64-JSON
+            services.AddHttpClient<OllamaTextClient>(client =>
+            {
+                client.Timeout = TimeSpan.FromMinutes(8);
+            }).AddResilienceHandler("OllamaTextPipeline", pb => pb.AddRetry(retryOptions));
+
 
             // ДИНАМИЧЕСКАЯ ФАБРИКА СЕЛЕКТОРА ДВИЖКА ИИ (Пункт 4.1.2)
             services.AddTransient<IAiTextClient>(sp =>
@@ -63,7 +69,7 @@ namespace AiSiteFiller.V2.Presentation.Common
                 bool useLocal = configuration.GetValue<bool>("AppSettings:UseLocalAi");
                 return useLocal
                     ? (IAiTextClient)sp.GetRequiredService<OllamaTextClient>()
-                    : (IAiTextClient)sp.GetRequiredService<DeepSeekClient>();
+                    : (IAiTextClient)sp.GetRequiredService<CloudAiClient>();
             });
 
             // Графика и цензор
@@ -88,6 +94,15 @@ namespace AiSiteFiller.V2.Presentation.Common
             {
                 client.Timeout = TimeSpan.FromMinutes(2);
             }).AddResilienceHandler("WpPipeline", pb => pb.AddRetry(retryOptions));
+            
+            // 9. Регистрация HttpClient-парсера контента с защитой Polly v8
+            services.AddHttpClient<IProductParser, MarketProductParser>()
+                .AddResilienceHandler("ParserPipeline", pb => pb.AddRetry(retryOptions));
+
+            // 10. Регистрация долгоживущей фоновой службы автоматического выката статей по расписанию
+            services.AddHostedService<QueueProcessorWorker>();
+
+
 
             return services;
         }

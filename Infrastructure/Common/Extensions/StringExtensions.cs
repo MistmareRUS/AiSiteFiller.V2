@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text.RegularExpressions;
 
 namespace AiSiteFiller.V2.Infrastructure.Common.Extensions
 {
@@ -8,6 +9,13 @@ namespace AiSiteFiller.V2.Infrastructure.Common.Extensions
         {
             if (string.IsNullOrWhiteSpace(url)) return string.Empty;
             return url.Replace(" + ", "");
+        }
+        public static string CleanToken(this string? token)
+        {
+            if (string.IsNullOrWhiteSpace(token)) return string.Empty;
+
+            // Вырезаем всё, кроме разрешенных букв, цифр и спецсимволов токена
+            return Regex.Replace(token, @"[^a-zA-Z0-9_\-\+]", "").Trim();
         }
 
         /// <summary>

@@ -6,7 +6,7 @@ namespace AiSiteFiller.V2.Application.Interfaces
     public interface IAiTextClient
     {
         /// <summary>
-        /// Отправляет сырые характеристики и отзывы товара в DeepSeek V3.
+        /// Отправляет сырые характеристики и отзывы товара в CloudAi.
         /// Возвращает чистую строку структурированного JSON-пакета в формате Base64.
         /// </summary>
         /// <param name="productName">Название модели устройства</param>
