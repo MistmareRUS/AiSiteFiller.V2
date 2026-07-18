@@ -1,47 +1,85 @@
 ﻿using System;
 using System.IO;
 using System.Windows.Forms;
+using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Serilog;
 using AiSiteFiller.V2.Presentation.Common;
+using AiSiteFiller.V2.Infrastructure.Persistence;
+using AiSiteFiller.V2.Application.Interfaces;
 
 namespace AiSiteFiller.V2.Presentation
 {
-    internal static class Program
+    public static class Program
     {
-        public static IConfiguration Configuration { get; private set; } = null!;
+        private static IConfiguration? _configuration;
         public static IServiceProvider ServiceProvider { get; private set; } = null!;
 
+        public static IConfiguration Configuration => _configuration ??= new ConfigurationBuilder()
+            .SetBasePath(Directory.GetCurrentDirectory())
+            .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+            .AddJsonFile("appsettings.local.json", optional: true, reloadOnChange: true)
+            .AddJsonFile("prompts.json", optional: true, reloadOnChange: true)
+            .Build();
+
         [STAThread]
-        private static void Main()
+        private static async Task Main()
         {
+            // Инициализация Serilog (логи на диск и в будущее графическое окно)
+            Log.Logger = new LoggerConfiguration()
+                .MinimumLevel.Information()
+                .WriteTo.File("logs/log-.txt", rollingInterval: RollingInterval.Day, outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}")
+                .CreateLogger();
+
             try
             {
-                // Инициализируем сборщик конфигурации (Пункты 2.2.2 - 2.2.3)
-                var builder = new ConfigurationBuilder()
-                    .SetBasePath(Directory.GetCurrentDirectory())
-                    .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-                    .AddJsonFile("appsettings.local.json", optional: true, reloadOnChange: true)
-                    .AddJsonFile("prompts.json", optional: true, reloadOnChange: true);
+                Log.Information("=== СТАРТ ЛОКАЛЬНОГО ИНТЕГРАЦИОННОГО КОНВЕЙЕРА ===");
 
-                Configuration = builder.Build();
-
-                // Инициализируем пул зависимостей DI-контейнера (Пункт 2.2.4)
                 var services = new ServiceCollection();
-
-                // Вызываем наш метод расширения для наполнения пула базовыми службами
+                services.AddLogging(loggingBuilder => loggingBuilder.AddSerilog(dispose: true));
                 services.AddPresentationServices(Configuration);
-
-                // Строим провайдер служб, из которого WinForms будет извлекать готовые объекты
                 ServiceProvider = services.BuildServiceProvider();
 
-                MessageBox.Show("Пул зависимостей DI-контейнера на .NET 10 успешно собран!", "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                // Автоматическое применение миграций к PostgreSQL при каждом запуске приложения
+                using (var scope = ServiceProvider.CreateScope())
+                {
+                    var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+                    await dbContext.Database.MigrateAsync();
+                    Log.Information("База данных PostgreSQL успешно синхронизирована с миграциями EF Core.");
+
+                    // Логика автоматического ремонта зафейленных задач на этапе отладки
+                    bool shouldReset = Configuration.GetValue<bool>("AppSettings:ResetErrorsOnStart");
+                    if (shouldReset)
+                    {
+                        var queueRepo = scope.ServiceProvider.GetRequiredService<IQueueRepository>();
+                        await queueRepo.ResetFailedTasksAsync();
+                    }
+                }
+
+                // ВЫЗОВ ОРКЕСТРАТОРА (ТЕСТОВАЯ ПЕРВАЯ ГЕНЕРАЦИЯ БЕЗ UI)
+                using (var scope = ServiceProvider.CreateScope())
+                {
+                    var orchestrator = scope.ServiceProvider.GetRequiredService<IContentOrchestrator>();
+
+                    // Задаем тестовую трендовую модель для проверки всех слоев архитектуры
+                    string testProduct = "Roborock S8 MaxV Ultra Black";
+
+                    long articleId = await orchestrator.GenerateAndQueueArticleAsync(testProduct);
+                    Log.Information("=== УСПЕХ! Статья {Id} сгенерирована и нарезана в очередь публикаций. ===", articleId);
+                }
+
+                MessageBox.Show("Первый тестовый запуск конвейера успешно завершен! Базы данных наполнены.", "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             catch (Exception ex)
             {
-                // Жесткое правило: логируем критическую ошибку и пробрасываем её дальше
-                MessageBox.Show($"Критический сбой инициализации пула DI: {ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                throw;
+                Log.Fatal(ex, "Критический сбой в главном потоке фабрики контента.");
+                MessageBox.Show($"Критический сбой конвейера: {ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                await Log.CloseAndFlushAsync();
             }
         }
     }

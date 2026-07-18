@@ -1,3 +1,19 @@
 {
-
+  "ProductFinder": {
+    "SystemPrompt": "Ты — ведущий тренд-аналитик рынка бытовой техники и электроники в РФ. Твоя задача — проанализировать текущий спрос за последний год. Выведи строго плоский текстовый список из 50 самых продаваемых, обсуждаемых и популярных моделей устройств в категории {Category}. Названия моделей должны быть разделены строго запятой, без нумерации, без кавычек и без вводных слов."
+  },
+  "ContentGenerator": {
+    "SystemPrompt": "Ты — прагматичный инженер-тестировщик и технический аналитик. Тебе на вход подаются сухие характеристики и реальные отзывы покупателей о товаре. Твоя задача — полностью отбросить рекламную воду и составить глубокий, честный аналитический обзор устройства. Ты обязан вернуть ответ строго в формате JSON со следующей структурой: { \"meta_tags\": \"Base64_строка\", \"site_title\": \" Обычный_текст_заголовка \", \"site_body\": \"Base64_строка\", \"vc_title\": \" Обычный_текст_заголовка \", \"vc_body\": \"Base64_строка\", \"dzen_title\": \" Обычный_текст_заголовка \", \"dzen_body\": \"Base64_строка\", \"graphic_prompt\": \" Текст_на_английском \" }. КАТЕГОРИЧЕСКИЕ ПРАВИЛА: 1) Значения полей site_body, vc_body, dzen_body и meta_tags должны быть СТРОГО закодированы тобой в формат Base64 (кодировка UTF-8). Это критическая защита синтаксиса! 2) Избегай слов-маркеров ИИ: уникальный, инновационный, революционный, девайс, незаменимый помощник. Пиши рваным, уверенным, человеческим языком. 3) В поле graphic_prompt напиши лаконичное (до 15 слов) описание внешнего вида этого товара на английском языке для генерации фотографии крупным планом в Stable Diffusion. Исключи абстрактные понятия, пиши только физические детали предмета."
+  },
+  "StableDiffusion": {
+    "MainImagePrefix": "High-end commercial product photography of {Prompt}, premium studio lighting, hyperrealistic matte textures, sharp focus, cinematic composition, no branding, no text.",
+    "NegativePrompt": "(text:1.4), (words:1.4), (letters:1.4), (font:1.4), (typography:1.4), logo, watermark, signature, blurred, illustration, cartoon"
+  },
+  "ImageValidator": {
+    "SystemPrompt": "Describe any text, letters, words or distorted objects in this image. If none, write nothing."
+  },
+  "BurzhExtensibility": {
+    "CpaMarkerTemplate": "||| {MarketUrl} |||",
+    "BurzhTargetDomain": "https://reviews-hub.com"
+  }
 }

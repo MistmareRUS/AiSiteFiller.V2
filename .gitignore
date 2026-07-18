@@ -480,5 +480,21 @@ $RECYCLE.BIN/
 
 # Vim temporary swap files
 *.swp
-a p p s e t t i n g s . l o c a l . j s o n  
- 
+# Игнорируем папки компиляции и сборки .NET
+bin/
+obj/
+
+# Игнорируем локальные логи Serilog
+logs/
+
+# КАТЕГОРИЧЕСКИ ИГНОРИРУЕМ ФАЙЛЫ ЛОКАЛЬНЫХ СЕКРЕТОВ И НАСТРОЕК
+appsettings.local.json
+
+# Игнорируем файлы пользовательских настроек Visual Studio
+.vs/
+*.user
+*.suo
+
+appsettings.local.json
+ 
+ 

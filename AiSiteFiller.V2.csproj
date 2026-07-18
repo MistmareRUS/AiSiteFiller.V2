@@ -16,19 +16,29 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.10">
+		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		  <PrivateAssets>all</PrivateAssets>
+		</PackageReference>
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.10">
+		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		  <PrivateAssets>all</PrivateAssets>
+		</PackageReference>
 		<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="10.0.10" />
 		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.10" />
+		<PackageReference Include="Microsoft.Extensions.Http" Version="10.0.10" />
+		<PackageReference Include="Microsoft.Extensions.Http.Resilience" Version="10.8.0" />
 		<PackageReference Include="MongoDB.Driver" Version="3.10.0" />
 		<PackageReference Include="Npgsql" Version="10.0.3" />
+		<PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.3" />
 		<PackageReference Include="Polly" Version="8.7.0" />
+		<PackageReference Include="Serilog" Version="4.4.0" />
+		<PackageReference Include="Serilog.Extensions.Logging" Version="10.0.0" />
+		<PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
+		<PackageReference Include="System.Drawing.Common" Version="10.0.10" />
 	</ItemGroup>
 
 	<ItemGroup>
-		<Folder Include="Application\Interfaces\" />
-		<Folder Include="Application\Services\" />
-		<Folder Include="Infrastructure\Clients\" />
-		<Folder Include="Infrastructure\Services\" />
-		<Folder Include="Infrastructure\Persistence\" />
 		<Folder Include="Presentation\Forms\" />
 	</ItemGroup>
 
