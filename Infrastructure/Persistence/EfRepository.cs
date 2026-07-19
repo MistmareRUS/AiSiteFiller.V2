@@ -110,5 +110,13 @@ namespace AiSiteFiller.V2.Infrastructure.Persistence
         }
 
         #endregion
+
+        // === МЕТКА: ТЕХНИЧЕСКИЙ ПОДСЧЕТ ЗАДАЧ ПО СТАТУСАМ ===
+        public async Task<int> GetCountByStatusAsync(PublicationStatus status, CancellationToken cancellationToken = default)
+        {
+            // Обращаемся напрямую к Npgsql-драйверу через DbSet для мгновенного подсчета строк
+            return await _context.PublishingQueue
+                .CountAsync(t => t.Status == status, cancellationToken);
+        }
     }
 }

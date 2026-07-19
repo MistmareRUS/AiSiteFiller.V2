@@ -27,5 +27,7 @@ namespace AiSiteFiller.V2.Application.Interfaces
         /// Опциональный сброс: переводит все упавшие в Error задачи обратно в Pending на старте отладки
         /// </summary>
         Task ResetFailedTasksAsync(CancellationToken cancellationToken = default);
+
+        Task<int> GetCountByStatusAsync(PublicationStatus status, CancellationToken cancellationToken = default);
     }
 }
